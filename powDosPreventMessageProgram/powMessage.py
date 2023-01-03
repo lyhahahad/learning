@@ -9,31 +9,29 @@ class msg:
     def __init__(self) :
         self.name = ""
         self.text = ""
-        self.nonce = 0
         self.pownonce = 0
 
 #메시지 전송자 클래스
 class sender:
     def __init__(self, diff) -> None:
         self.diff = diff
+        self.nonce = 0
 
-    #메시지 해시캐시 진행
+    #메시지 해시캐시 진행.
     def hashCash(self, msg):
         data = "%s %s "%(msg.text, msg.rand)
         data = data.encode()
         while(msg.hashString[:self.diff] != "0"*self.diff):
-            print(msg.hashString[:self.diff])
-            print("0"*self.diff)
             msg.pownonce +=1
             data_nonce = data+str(msg.pownonce).encode()
             msg.hashString = hashlib.sha1(data_nonce).hexdigest()
-            print(msg.pownonce)
         return
 
     #메시지 전송
     def send(self, msg):
         msgs = pickle.dumps(msg)
         udp_client_socket.sendto(msgs, ("127.0.0.1", 3000))
+        self.nonce +=1
         print("전송 성공")
         return
 
@@ -44,13 +42,15 @@ class receiver:
     def __init__(self, diff) -> None:
         self.diff = diff
         # {임요한 : {hashString : , nonce : }}
-        self.sender = []
+        self.sender = {}
 
     #메시지 해시캐시 검중.
     def verify(self, msg):
         data = "%s %s %s"%(msg.text, msg.nonce, msg.pownonce)
         msghash = data.encode()
-        if(sender[msg.name])
+        if(msg.name not in self.sender):
+            sender[msg.name] = ["", 0]
+
         #메시지 반복 검사.
         if msghash == self.sender[msg.name]['hashString']:
             print("반복 메시징.")
@@ -61,6 +61,8 @@ class receiver:
             print("난이도가 올바르지 않음.")
             return False
 
+        sender[msg.name][0] = msghash
+        sender[msg.name][1] += 1
         return True
         
 
@@ -74,15 +76,13 @@ class receiver:
 
 sender = sender(2)
 receiver = receiver(2)
-msg0 = msg()
+msg0 = msg()    
 
 def senderThread():
     msg0.name = input("이름을 입력하세요 : ")
     sender.diff = int(input("난이도를 입력하세요 : "))
     while(True):
         msg0.text = input("text : ")
-        msg0.hashString = ""
-        msg0.nonce = 0
         sender.hashCash(msg0)
         sender.send(msg0)
 
