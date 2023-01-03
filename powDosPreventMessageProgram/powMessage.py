@@ -19,12 +19,14 @@ class sender:
 
     #메시지 해시캐시 진행.
     def hashCash(self, msg):
-        data = "%s %s "%(msg.text, msg.rand)
+        data = "%s %s"%(msg.text,self.nonce)
         data = data.encode()
-        while(msg.hashString[:self.diff] != "0"*self.diff):
+        data_nonce = data+str(msg.pownonce).encode()
+        hashstring = hashlib.sha1(data_nonce).hexdigest()        
+        while(hashstring[:self.diff] != "0"*self.diff):
             msg.pownonce +=1
             data_nonce = data+str(msg.pownonce).encode()
-            msg.hashString = hashlib.sha1(data_nonce).hexdigest()
+            hashstring = hashlib.sha1(data_nonce).hexdigest()
         return
 
     #메시지 전송
@@ -46,13 +48,13 @@ class receiver:
 
     #메시지 해시캐시 검중.
     def verify(self, msg):
-        data = "%s %s %s"%(msg.text, msg.nonce, msg.pownonce)
-        msghash = data.encode()
         if(msg.name not in self.sender):
-            sender[msg.name] = ["", 0]
-
+            self.sender[msg.name] = ["", 0]
+        data = "%s %s %s"%(msg.text, self.sender[msg.name][1], msg.pownonce)
+        msghash = hashlib.sha1(data.encode()).hexdigest()
+        print(msghash)
         #메시지 반복 검사.
-        if msghash == self.sender[msg.name]['hashString']:
+        if msghash == self.sender[msg.name][0]:
             print("반복 메시징.")
             return False
 
