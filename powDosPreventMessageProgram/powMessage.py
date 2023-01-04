@@ -19,7 +19,7 @@ class sender:
 
     #메시지 해시캐시 진행.
     def hashCash(self, msg):
-        data = "%s %s"%(msg.text,self.nonce)
+        data = "%s %s "%(msg.text,self.nonce)
         data = data.encode()
         data_nonce = data+str(msg.pownonce).encode()
         hashstring = hashlib.sha1(data_nonce).hexdigest()        
@@ -27,6 +27,7 @@ class sender:
             msg.pownonce +=1
             data_nonce = data+str(msg.pownonce).encode()
             hashstring = hashlib.sha1(data_nonce).hexdigest()
+            print(hashstring)
         return
 
     #메시지 전송
